@@ -261,7 +261,7 @@ export const timeline: TimelineItem[] = [
     type: 'education',
     title: 'Bachelor of Computer Applications',
     org: 'Khadir Mohideen College',
-    period: '2018 — 2020',
+    period: '2015 — 2018',
     points: ['Domain of Computer Science and Technology'],
   },
 ]
