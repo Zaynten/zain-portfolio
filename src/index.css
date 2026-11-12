@@ -1,0 +1,226 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root,
+[data-theme='light'] {
+  --bg: 248 249 252; /* #F8F9FC */
+  --lavender: 234 232 255; /* #EAE8FF */
+  --sky: 229 241 255; /* #E5F1FF */
+  --mint: 226 246 238; /* #E2F6EE */
+  --primary: 116 101 216; /* #7465D8 */
+  --secondary: 98 185 154; /* #62B99A */
+  --ink: 36 36 58; /* #24243A */
+  --muted: 87 94 117; /* #575E75 — deepened from #777F96 for readable contrast */
+  --glass: rgba(255, 255, 255, 0.65);
+  --glass-strong: rgba(255, 255, 255, 0.82);
+  --glass-border: rgba(255, 255, 255, 0.85);
+  --glass-edge: rgba(116, 101, 216, 0.1);
+  --blob-opacity: 0.9;
+  color-scheme: light;
+}
+
+[data-theme='dark'] {
+  --bg: 14 14 26;
+  --lavender: 44 38 92;
+  --sky: 24 42 72;
+  --mint: 20 54 46;
+  --primary: 160 148 245;
+  --secondary: 104 196 164;
+  --ink: 238 238 249;
+  --muted: 156 162 186;
+  --glass: rgba(30, 30, 52, 0.55);
+  --glass-strong: rgba(36, 36, 62, 0.8);
+  --glass-border: rgba(255, 255, 255, 0.09);
+  --glass-edge: rgba(160, 148, 245, 0.14);
+  --blob-opacity: 0.55;
+  color-scheme: dark;
+}
+
+html {
+  overflow-x: clip;
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  @apply bg-bg font-sans text-ink antialiased;
+  transition: background-color 0.4s ease, color 0.4s ease;
+  overflow-x: hidden;
+}
+
+/* Fine film grain for a tactile, premium finish */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+[data-theme='dark'] body::after {
+  opacity: 0.06;
+}
+
+::selection {
+  background: rgb(var(--primary) / 0.25);
+}
+
+:focus-visible {
+  outline: 2px solid rgb(var(--primary));
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+@layer components {
+  .glass {
+    background: var(--glass);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    backdrop-filter: blur(20px) saturate(150%);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 10px 40px -12px rgb(var(--primary) / 0.18),
+      0 2px 8px -2px rgb(var(--ink) / 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  }
+  [data-theme='dark'] .glass {
+    box-shadow: 0 10px 40px -12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+  .glass-strong {
+    background: var(--glass-strong);
+  }
+  /* Small screens: heavy backdrop blur makes cards look soft and is costly to render */
+  @media (max-width: 767px) {
+    .glass {
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+      background: var(--glass-strong);
+    }
+  }
+  /* Light theme: purple used as TEXT gets a deeper shade so it stays readable.
+     Buttons and fills keep the brand #7465D8. */
+  [data-theme='light'] .text-primary {
+    color: rgb(91 75 196);
+  }
+
+  [data-theme='dark'] .on-primary {
+    color: rgb(var(--bg));
+  }
+
+  /* Cursor-tracked spotlight + glowing border on glass cards */
+  .spot,
+  .lift {
+    position: relative;
+    isolation: isolate;
+  }
+  .spot::before,
+  .lift::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    background: radial-gradient(
+      420px circle at var(--mx, 50%) var(--my, 50%),
+      rgb(var(--primary) / 0.13),
+      transparent 45%
+    );
+  }
+  .spot::after,
+  .lift::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    background: radial-gradient(
+      240px circle at var(--mx, 50%) var(--my, 50%),
+      rgb(var(--primary) / 0.7),
+      rgb(var(--secondary) / 0.35) 40%,
+      transparent 70%
+    );
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  }
+  .spot:hover::before,
+  .lift:hover::before,
+  .spot:hover::after,
+  .lift:hover::after {
+    opacity: 1;
+  }
+
+  /* Light sweep across primary buttons */
+  .shine {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .shine::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    transform: translateX(-130%) skewX(-20deg);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .shine:hover::after {
+    transform: translateX(130%) skewX(-20deg);
+  }
+
+  /* Brief highlight when a pricing plan sends the visitor to the form */
+  .form-flash {
+    animation: formflash 1.6s ease-out;
+  }
+  @keyframes formflash {
+    0% { box-shadow: 0 0 0 0 rgb(var(--primary) / 0.45); }
+    30% { box-shadow: 0 0 0 10px rgb(var(--primary) / 0.18); }
+    100% { box-shadow: 0 0 0 22px rgb(var(--primary) / 0); }
+  }
+
+  .dot-grid {
+    background-image: radial-gradient(rgb(var(--ink) / 0.09) 1px, transparent 1px);
+    background-size: 24px 24px;
+    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 45%, #000 20%, transparent 75%);
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 45%, #000 20%, transparent 75%);
+  }
+  .lift {
+    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.35s ease,
+      border-color 0.35s ease;
+  }
+  .lift:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 24px 60px -16px rgb(var(--primary) / 0.3), 0 4px 12px -4px rgb(var(--ink) / 0.08);
+    border-color: rgb(var(--primary) / 0.25);
+  }
+  .field {
+    @apply w-full rounded-2xl border bg-white/50 px-4 py-3.5 text-sm text-ink outline-none transition placeholder:text-muted/80;
+    border-color: var(--glass-edge);
+  }
+  [data-theme='dark'] .field {
+    @apply bg-white/5;
+  }
+  .field:focus {
+    border-color: rgb(var(--primary) / 0.6);
+    box-shadow: 0 0 0 4px rgb(var(--primary) / 0.12);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
